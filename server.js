@@ -33,7 +33,7 @@ const UserModel = mongoose.model("User", userSchema);
 // Body parser: parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// POST requests: Create New User
+// POST request: create new user
 app.post('/api/users', (req, res) => {
   UserModel.find({ username: req.body.username }, (err, docs) => {
     if (err) {
@@ -54,6 +54,12 @@ app.post('/api/users', (req, res) => {
       res.json("Username already in use. Please try a different one.");
     };
   });
+});
+
+// GET request: show all users
+app.get('/api/users', async (req, res) => {
+  const users = await UserModel.find().select('-__v');
+  res.json(users);
 });
 
 // Listen connection on port
