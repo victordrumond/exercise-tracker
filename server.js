@@ -88,7 +88,7 @@ app.post('/api/users/:_id/exercises', (req, res) => {
         username: docs.username,
         description: req.body.description,
         duration: parseInt(req.body.duration),
-        date: req.body.date === '' ? new Date().toDateString() : new Date(Date.parse(req.body.date)).toDateString(),
+        date: req.body.date === '' ? new Date().toUTCString() : new Date(Date.parse(req.body.date)).toUTCString(),
         userId: docs._id
       });
       newExercise.save((err, exercise) => {
