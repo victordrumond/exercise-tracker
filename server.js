@@ -83,14 +83,14 @@ app.post('/api/users/:id/exercises', (req, res) => {
       res.json('Description is required.');
     } else if (req.body.duration === '' || isNaN(parseInt(req.body.duration))) {
       res.json('Duration is required and must be a number.');
-    } else if (req.body.date !== '' && isNaN(Date.parse(req.body.date))) {
+    } else if (req.body.date && isNaN(new Date(req.body.date))) {
       res.json('Date is not required but if present must be a valid JavaScript string date.');
     } else {
       let newExercise = new ExerciseModel({
         username: data.username,
         description: req.body.description,
         duration: req.body.duration,
-        date: req.body.date === '' ? new Date().toDateString() : new Date(req.body.date).toDateString()
+        date: !(req.body.date) ? new Date().toDateString() : new Date(req.body.date).toDateString()
       });
       newExercise.save((err, exercise) => {
         if (err) {
