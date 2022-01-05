@@ -22,7 +22,7 @@ const exerciseSchema = new mongoose.Schema({
   username: String,
   description: String,
   duration: Number,
-  date: Date
+  date: String
 });
 const logSchema = new mongoose.Schema({
   username: String,
@@ -81,41 +81,33 @@ app.get('/api/users', async (req, res) => {
 });
 
 // POST request: add exercise
-app.post('/api/users/:_id/exercises', (req, res) => {
-
-  const dealWithDate = (date) => {
-    if (date instanceof Date && !isNaN(date)) {
-      return new Date(date);
-    } else {
-      return new Date();
-    };
-  };
-
-  UserModel.findById(req.body.id, (err, data) => {
-
-    let description = req.body.description;
-    let duration = req.body.duration;
-    let date = dealWithDate(req.body.date);
-
-    if (err) {
-      console.log(err);
+app.post('/api/users/:id/exercises', (req, res) => {
+  UserModel.findById(req.params.id, (err, data) => {
+    if (err || !data) {
+      res.json('There was an error processing your request. Please try again.');
+    } else if (req.body.description === '') {
+      res.json('Description is required.');
+    } else if (req.body.duration === '' || isNaN(parseInt(req.body.duration))) {
+      res.json('Duration is required and must be a number.');
+    } else if (req.body.date !== '' && isNaN(Date.parse(req.body.date))) {
+      res.json('Date is not required but if present must be a valid JavaScript string date.');
     } else {
       let newExercise = new ExerciseModel({
-        "username": data.username,
-        "description": description,
-        "duration": duration,
-        "date": date.toDateString()
+        username: data.username,
+        description: req.body.description,
+        duration: req.body.duration,
+        date: req.body.date === '' ? new Date().toDateString() : new Date(req.body.date).toDateString()
       });
       newExercise.save((err, exercise) => {
         if (err) {
           console.log(err);
         } else {
           res.json({
-            "_id": req.body.id,
-            "username": exercise.username,
-            "description": exercise.description,
-            "duration": exercise.duration,
-            "date": exercise.date
+            username: exercise.username,
+            _id: req.params.id,
+            description: exercise.description,
+            duration: exercise.duration,
+            date: exercise.date
           });
         };
       });
