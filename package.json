@@ -12,10 +12,10 @@
 		"dev": "nodemon server.js"
 	},
 	"dependencies": {
-		"body-parser": "^1.19.1",
 		"cors": "^2.8.5",
 		"dotenv": "^8.2.0",
 		"express": "^4.16.4",
+		"generate-unique-id": "^2.0.1",
 		"mongodb": "^4.2.2",
 		"mongoose": "^6.1.4"
 	},
