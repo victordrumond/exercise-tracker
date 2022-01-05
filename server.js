@@ -24,14 +24,8 @@ const exerciseSchema = new mongoose.Schema({
   duration: Number,
   date: String
 });
-const logSchema = new mongoose.Schema({
-  username: String,
-  count: Number,
-  log: Array
-});
 const UserModel = mongoose.model('User', userSchema);
 const ExerciseModel = mongoose.model('Exercise', exerciseSchema);
-const LogModel = mongoose.model('Log', logSchema);
 
 // Middlewares
 app.use(express.urlencoded({ extended: false }));
@@ -113,6 +107,36 @@ app.post('/api/users/:id/exercises', (req, res) => {
       });
     };
   });
+});
+
+// GET request: exercise log
+app.get('/api/users/:id/logs', async (req, res) => {
+  const user = await UserModel.find({ _id: req.params.id });
+  if (user.length === 0) {
+    res.json('User not found. Please try a different id.');
+  } else {
+    ExerciseModel.find({ username: user[0].username }, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        let log = [];
+        data.forEach(item => {
+          let newItem = {
+            "description": item.description,
+            "duration": item.duration,
+            "date": item.date
+          };
+          log.push(newItem);
+        });
+        res.json({
+          "username": user[0].username,
+          "_id": req.params.id,
+          "count": data.length,
+          "log": log
+        });
+      };
+    });
+  };
 });
 
 // Listen connection on port
