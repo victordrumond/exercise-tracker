@@ -115,19 +115,41 @@ app.get('/api/users/:id/logs', async (req, res) => {
   if (user.length === 0) {
     res.json('User not found. Please try a different id.');
   } else {
+    const { from, to, limit } = req.query;
+    let fromDate, toDate;
+    if (from === undefined && to === undefined) {
+      fromDate = new Date(0);
+      toDate = new Date();
+    } else if (from !== undefined && to === undefined) {
+      fromDate = new Date(from);
+      toDate = new Date();
+    } else if (from === undefined && to !== undefined) {
+      fromDate = new Date(0);
+      toDate = new Date(to);
+    } else if (from !== undefined && to !== undefined) {
+      fromDate = new Date(from);
+      toDate = new Date(to);
+    };
     ExerciseModel.find({ username: user[0].username }, (err, data) => {
       if (err) {
         console.log(err);
       } else {
+        let filteredData = data.filter(item => new Date(Date.parse(item.date)) >= fromDate && new Date(Date.parse(item.date)) <= toDate);
         let log = [];
-        data.forEach(item => {
+        let outputLength;
+        if (limit <= filteredData.length) {
+          outputLength = limit;
+        } else {
+          outputLength = filteredData.length
+        };
+        for (let i = 0; i < outputLength; i++) {
           let newItem = {
-            "description": item.description,
-            "duration": item.duration,
-            "date": item.date
+            "description": filteredData[i].description,
+            "duration": filteredData[i].duration,
+            "date": filteredData[i].date
           };
           log.push(newItem);
-        });
+        };
         res.json({
           "username": user[0].username,
           "_id": req.params.id,
